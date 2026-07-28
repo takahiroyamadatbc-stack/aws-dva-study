@@ -83,5 +83,6 @@ aws resourcegroupstaggingapi get-resources \
 | [001](labs/001-sam-transform/) | Q22 | SAM Transform | SAM | 完 | TransformはCFnデプロイ時にサーバー側で展開されるマクロ |
 | [007](labs/007-kinesis-lambda-iteratorage/) | - | Kinesis+Lambda IteratorAge | CLI | 完 | IteratorAgeは滞留時間の指標。改善はLambdaメモリ増加とシャード数増加で、タイムアウト変更は的外れ |
 | [008](labs/008-alb-xff-clientip/) | Q49 | ALB配下でのクライアントIP記録(X-Forwarded-For) | CLI | 完 | ALB配下ではremote_addrが常にALBのIPになるため、実クライアントIPはX-Forwarded-Forヘッダーをログ設定に追加して記録する |
+| [009](labs/009-cloudwatch-metric-filter/) | Q52 | CloudWatch Logsメトリクスフィルターによるエラー検知通知 | CLI | 完 | CloudWatchアラームはメトリクスしか監視できないため、ログの文字列検知にはメトリクスフィルターでログをメトリクスに変換する必要がある |
 
 状態は `未着手` / `検証中` / `完` のいずれかを記載する。
