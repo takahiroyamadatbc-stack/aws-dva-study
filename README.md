@@ -41,6 +41,7 @@ cdk synth
 ## Labの作り方
 
 Labには2つの型があり、内容に応じて選ぶ（CDKを組むほどの規模でなければCLIスクリプト型でよい）。
+標準ではコード（IaC/CLIスクリプト）とREADMEの結論整理までを完了条件とし、実機へのデプロイ・実行はユーザーが明示的に指示した場合のみ行う（詳細はCLAUDE.md「AWS実行について」を参照）。
 
 - **IaC型**: CDK/SAMでリソースを構築する場合。`template.yaml` / `app.py` / `cdk.json` / `stack.py` を使う
 - **CLIスクリプト型**: CLIコマンドの実行だけで検証できる場合。`01_create_xxx.sh` → `02_check_xxx.sh` → `0N_delete_xxx.sh` のように、実行順に番号を振ったシェルスクリプトとして残す。最後の番号は必ず片付け（delete）用スクリプトにする
@@ -80,5 +81,7 @@ aws resourcegroupstaggingapi get-resources \
 | Lab | 問題 | テーマ | ツール | 状態 | 一行結論 |
 |-----|------|--------|--------|------|----------|
 | [001](labs/001-sam-transform/) | Q22 | SAM Transform | SAM | 完 | TransformはCFnデプロイ時にサーバー側で展開されるマクロ |
+| [007](labs/007-kinesis-lambda-iteratorage/) | - | Kinesis+Lambda IteratorAge | CLI | 完 | IteratorAgeは滞留時間の指標。改善はLambdaメモリ増加とシャード数増加で、タイムアウト変更は的外れ |
+| [008](labs/008-alb-xff-clientip/) | Q49 | ALB配下でのクライアントIP記録(X-Forwarded-For) | CLI | 完 | ALB配下ではremote_addrが常にALBのIPになるため、実クライアントIPはX-Forwarded-Forヘッダーをログ設定に追加して記録する |
 
 状態は `未着手` / `検証中` / `完` のいずれかを記載する。
