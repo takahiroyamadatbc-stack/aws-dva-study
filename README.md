@@ -40,29 +40,39 @@ cdk synth
 
 ## Labの作り方
 
-1. `labs/_template/` を `labs/NNN-topic/` としてコピーする（連番は最後に使った番号+1）
+Labには2つの型があり、内容に応じて選ぶ（CDKを組むほどの規模でなければCLIスクリプト型でよい）。
+
+- **IaC型**: CDK/SAMでリソースを構築する場合。`template.yaml` / `app.py` / `cdk.json` / `stack.py` を使う
+- **CLIスクリプト型**: CLIコマンドの実行だけで検証できる場合。`01_create_xxx.sh` → `02_check_xxx.sh` → `0N_delete_xxx.sh` のように、実行順に番号を振ったシェルスクリプトとして残す。最後の番号は必ず片付け（delete）用スクリプトにする
+
+1. `labs/NNN-topic/` を作る（連番は最後に使った番号+1）。IaC型は `labs/_template/` をコピーする
 2. `README.md` の各セクション（問題／選んだ答えと理由／誤答の型／仮説／検証／結論／片付け）を埋める
-3. IaCでの検証が必要ないLab（CLIだけで完結する場合）は `commands.md` だけでもよい。
-   その場合 `app.py` / `cdk.json` / `stack.py` は削除してよい
-4. 検証が終わったら本READMEの索引テーブルに1行追加する
+3. テンプレの型に収まらない、試験に出そうな周辺知識や整理したい内容は `memo.md` にMarkdownでまとめてよい。誤答の検証を伴わない知識整理オンリーのLabは、README.mdを作らず `memo.md` だけでもよい
+4. 検証が終わったら本READMEの索引テーブルに1行追加する（memo.mdのみのLabは任意）
 
 **「一行結論」を埋めることがLabの完了条件です。** 試験直前の見直しは索引テーブルの
 「一行結論」列だけを読めば足りるようにしてください。
 
 ## 命名・事故防止の規約
 
-- スタック名は必ず `dva-NNN-topic` 形式にする（例: `dva-002-lambda-alias`）
-- デプロイ時は必ず `--tags Project=dva-study` を付ける
-- Labは使い捨て前提。検証が終わったら**必ず片付ける**（`cdk destroy` / `sam delete` など）
+- スタック名・S3バケット名・DynamoDBテーブル名など、AWS上に作るリソース名は必ず `dva-NNN-topic` 形式にし、Labのフォルダ番号（NNN）と一致させる（例: `dva-002-lambda-alias`）
+- デプロイ・作成時は必ず `--tags Project=dva-study`（CLIコマンドごとの相当するタグ指定）を付ける
+- Labは使い捨て前提。検証が終わったら**必ず片付ける**（`cdk destroy` / `sam delete` / CLIスクリプト型なら `0N_delete_xxx.sh` など）
 
 ### 消し忘れ検出コマンド
 
-作業終了時・久しぶりに作業を再開した時は、まずこれで残骸がないか確認する。
+作業終了時・久しぶりに作業を再開した時は、まずこれで残骸がないか確認する。CFnスタックだけでなく、CLIスクリプト型Labで直接作ったリソースも `Project=dva-study` タグで横断的に検出する。
 
 ```bash
+# CFnスタック（IaC型Lab）
 aws cloudformation list-stacks \
   --stack-status-filter CREATE_COMPLETE UPDATE_COMPLETE \
   --query "StackSummaries[?starts_with(StackName,'dva-')].StackName"
+
+# タグ付けされた全リソース（CLIスクリプト型Labも含む）
+aws resourcegroupstaggingapi get-resources \
+  --tag-filters Key=Project,Values=dva-study \
+  --query "ResourceTagMappingList[].ResourceARN"
 ```
 
 ## 索引
