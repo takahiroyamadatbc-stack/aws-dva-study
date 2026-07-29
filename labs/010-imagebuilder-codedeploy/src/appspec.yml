@@ -1,0 +1,12 @@
+version: 0.0
+os: linux
+files:
+  - source: /
+    destination: /opt/dva-010-app
+hooks:
+  BeforeInstall:
+    - location: scripts/install_dependencies.sh
+      timeout: 180
+  ApplicationStart:
+    - location: scripts/start_application.sh
+      timeout: 180

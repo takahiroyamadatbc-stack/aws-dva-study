@@ -1,0 +1,43 @@
+name: dva-010-imagebuilder-codedeploy-component
+description: OSセキュリティパッチ適用とCodeDeployエージェント導入のみを行う(アプリ本体は含めない)
+schemaVersion: 1.0
+
+phases:
+  - name: build
+    steps:
+      - name: ApplySecurityUpdates
+        action: ExecuteBash
+        inputs:
+          commands:
+            - sudo yum -y update --security
+      - name: InstallCodeDeployAgent
+        action: ExecuteBash
+        inputs:
+          commands:
+            - sudo yum -y install ruby wget
+            - cd /home/ec2-user
+            - wget https://aws-codedeploy-{{ imagebuilder:region }}.s3.{{ imagebuilder:region }}.amazonaws.com/latest/install
+            - chmod +x ./install
+            - sudo ./install auto
+      - name: EnableCodeDeployAgent
+        action: ExecuteBash
+        inputs:
+          commands:
+            - sudo systemctl enable codedeploy-agent
+            - sudo systemctl start codedeploy-agent
+
+  - name: validate
+    steps:
+      - name: ValidateCodeDeployAgentRunning
+        action: ExecuteBash
+        inputs:
+          commands:
+            - sudo systemctl is-active --quiet codedeploy-agent && echo "codedeploy-agent is active"
+
+  - name: test
+    steps:
+      - name: TestSecurityUpdatesApplied
+        action: ExecuteBash
+        inputs:
+          commands:
+            - yum history list | head -n 5

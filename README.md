@@ -84,5 +84,8 @@ aws resourcegroupstaggingapi get-resources \
 | [007](labs/007-kinesis-lambda-iteratorage/) | - | Kinesis+Lambda IteratorAge | CLI | 完 | IteratorAgeは滞留時間の指標。改善はLambdaメモリ増加とシャード数増加で、タイムアウト変更は的外れ |
 | [008](labs/008-alb-xff-clientip/) | Q49 | ALB配下でのクライアントIP記録(X-Forwarded-For) | CLI | 完 | ALB配下ではremote_addrが常にALBのIPになるため、実クライアントIPはX-Forwarded-Forヘッダーをログ設定に追加して記録する |
 | [009](labs/009-cloudwatch-metric-filter/) | Q52 | CloudWatch Logsメトリクスフィルターによるエラー検知通知 | CLI | 完 | CloudWatchアラームはメトリクスしか監視できないため、ログの文字列検知にはメトリクスフィルターでログをメトリクスに変換する必要がある |
+| [010](labs/010-imagebuilder-codedeploy/) | Q37 | EC2 Image Builder+CodeDeployによるスケールアウト時間短縮 | CLI | 完 | 「イメージ数最小化」はImage Builderを使うか否かではなくAMIに何を焼き込むかで決まる。アプリを含めずOS+パッチ+エージェントのみAMI化し、アプリはCodeDeployで配布すれば要件を両立できる |
+| [011](labs/011-cloudfront-acm-alias/) | Q41 | CloudFrontカスタムドメインのACM証明書リージョンとRoute 53エイリアス | CLI | 完 | CloudFrontに関連付けるACM証明書はオリジンのリージョンに関係なく常にus-east-1固定。Route 53でCloudFrontを指す際はIP固定管理の通常AレコードやCNAMEではなくAレコード(エイリアス)を使う |
+| [012](labs/012-secretsmanager-replication/) | 問題4 | Secrets Managerのクロスリージョンレプリケーション | CLI | 完 | レプリケーションは既存シークレットに「レプリカリージョンを追加する」だけで完結するネイティブ機能で、ローテーションとは無関係に自動同期される。暗号化キーはソース側ではなくレプリカ先リージョンのKMSキーを指定する |
 
 状態は `未着手` / `検証中` / `完` のいずれかを記載する。
