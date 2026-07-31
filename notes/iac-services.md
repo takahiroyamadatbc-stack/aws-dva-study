@@ -29,6 +29,13 @@
 - **ドリフト検出（Drift Detection）**: 実際のリソースとテンプレート定義の差分を検出
 - **DeletionPolicy/UpdateReplacePolicy**: リソース削除・置換時の挙動制御（`Retain`/`Snapshot`/`Delete`）
 - 「同一環境の再現」「反復デプロイ」「ロールバック」という要件セットが出たら、まずCloudFormation（またはSAM/CDKなどその上位ツール）を疑う
+- **カスタムリソース（`AWS::CloudFormation::CustomResource` / `Custom::任意の名前`）**：標準リソースタイプが対応していない操作をLambda（`ServiceToken`に指定）で肩代わりする仕組み
+  - 典型例：**プライベートサブネットのRDSインスタンスに対して、DBユーザーの作成・更新・削除をCloudFormationのスタックライフサイクルに乗せたい**場合
+    - RDSインスタンス自体はCloudFormationで作れるが、**DBエンジン内部のユーザー（`CREATE USER`等のSQL実行が必要）は標準リソースの管理対象外**
+    - カスタムリソースのLambdaが、スタックのCreate/Update/DeleteイベントごとにRDSへ接続しSQLを実行し、`cfnresponse`でSUCCESS/FAILEDを返す
+    - 同じテンプレートを複数アカウントにデプロイすれば、一貫性を保ったまま反復適用できる（さらにStackSetsを使えば一括配布も可能）
+  - 誤答になりやすいパターン：①標準CloudFormationのみで解決しようとする（DBユーザー管理に対応するリソースタイプが存在しない）、②単一Lambda関数に複数アカウントの資格情報をすべて持たせて手動実行する（クロスアカウント認証が複雑化し、CloudFormationのライフサイクル＝冪等性・ロールバック・ドリフト検出の恩恵を受けられない）、③EC2＋スクリプトで代替する（インフラ管理と手動実行の負荷が増える）
+  - 実装時の注意：LambdaはプライベートサブネットのRDSにアクセスするためVPC内に配置する必要がある／CloudFormationはUpdate失敗時に再度イベントを送ることがあるためLambda側の処理は冪等に作る／パスワード等の機密値はSecrets Managerと組み合わせる（[cloudformation-references.md](cloudformation-references.md)参照）
 
 ### AWS SAM
 - CloudFormationの拡張なので**素のCloudFormation構文もそのまま書ける**
