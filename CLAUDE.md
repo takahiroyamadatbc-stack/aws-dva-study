@@ -32,7 +32,7 @@
   - 特定のLab（誤答の検証・特定トピックの深掘り）に紐づく内容 → `labs/NNN-topic/memo.md`
   - 特定のLabに紐づかない、試験ドメイン横断の知識 → `notes/` 配下の該当ファイル（なければ新規作成）
 - 既存の `memo.md` がある場合は上書きではなく、内容を踏まえて追記・整理する
-- フォーマットは既存の `memo.md`（例: [labs/003-envelope-encryption/memo.md](labs/003-envelope-encryption/memo.md)）に合わせ、見出し・表・コードブロックを使い、試験直前に読み返せる密度で書く
+- フォーマットは既存の `memo.md`（例: [labs/004-s3-secure-transport/memo.md](labs/004-s3-secure-transport/memo.md)）に合わせ、見出し・表・コードブロックを使い、試験直前に読み返せる密度で書く
 
 ## 作業終了時
 
