@@ -34,4 +34,5 @@ CloudFormationテンプレートで「他の値を参照する」方法は`Ref`�
 
 ## 関連
 
+- [cloudformation-template-syntax.md](cloudformation-template-syntax.md)：テンプレートの全体構造・Parameters/Mappings/Conditions・リソース属性（DeletionPolicy等）・組み込み関数など、テンプレートの書き方そのもの
 - [iac-services.md](iac-services.md)：CloudFormation自体とSAM/CDK/Beanstalk等の比較
