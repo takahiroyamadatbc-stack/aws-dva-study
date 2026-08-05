@@ -361,6 +361,76 @@ YAMLとJSONは相互変換可能で、CloudFormationはどちらの形式でも�
 
 スタック更新時に、特定の**論理ID**のリソースが誤って更新・置換・削除されるのを防ぐJSONポリシー（IAMポリシーとは別物、`Resource`に論理IDを指定する）。デフォルトでは全リソースが更新可能で、重要なリソース（本番DBなど）だけ`Deny`ルールを明示して保護する。
 
+例えば以下のようなテンプレートで、本番用DBを論理ID`ProdDatabase`で作っているとする。
+
+```yaml
+Resources:
+  ProdDatabase:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      Engine: mysql
+      DBInstanceClass: db.t3.micro
+  WebServer:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: t3.micro
+```
+
+`ProdDatabase`だけを更新・置換・削除から保護したい場合、`stack-policy.json`というファイルを別途用意する（テンプレート本体には書かない、スタックに紐づく別リソース）。
+
+```json
+{
+  "Statement": [
+    {
+      "Effect": "Deny",
+      "Action": [
+        "Update:Replace",
+        "Update:Delete"
+      ],
+      "Principal": "*",
+      "Resource": "LogicalResourceId/ProdDatabase"
+    },
+    {
+      "Effect": "Allow",
+      "Action": "Update:*",
+      "Principal": "*",
+      "Resource": "*"
+    }
+  ]
+}
+```
+
+- `Resource`は論理ID（`LogicalResourceId/論理ID名`。ワイルドカードで`LogicalResourceId/*`も可）
+- `Action`は`Update:Modify`（プロパティ変更）/`Update:Replace`（置換）/`Update:Delete`（削除）/`Update:*`（すべて）
+- 上記は「`ProdDatabase`の置換・削除だけ拒否し、プロパティ変更(`Update:Modify`)は許可、他リソースは全操作許可」という設定。**より狭いルールが優先される**ため、後半の`Allow: Update:* / Resource: "*"`があっても`ProdDatabase`への`Replace`/`Delete`は先の`Deny`が効く
+
+適用はCLIから、スタック作成時または既存スタックへの設定として行う。
+
+```bash
+# 新規作成時に一緒に設定する
+aws cloudformation create-stack \
+  --stack-name dva-xxx-prod-app \
+  --template-body file://template.yaml \
+  --stack-policy-body file://stack-policy.json \
+  --tags Key=Project,Value=dva-study
+
+# 既存スタックに後から設定・更新する
+aws cloudformation set-stack-policy \
+  --stack-name dva-xxx-prod-app \
+  --stack-policy-body file://stack-policy.json
+```
+
+保守作業などで一時的に`ProdDatabase`の更新を許可したい場合は、スタックポリシー自体を書き換えるのではなく、`update-stack`実行時だけ`--stack-policy-during-update-body`で一時的に上書きする（この更新が終われば、元々設定されていた`stack-policy.json`の内容に自動的に戻る）。
+
+```bash
+aws cloudformation update-stack \
+  --stack-name dva-xxx-prod-app \
+  --template-body file://template.yaml \
+  --stack-policy-during-update-body file://allow-during-update.json
+```
+
+`allow-during-update.json`は`Effect: Allow`で`ProdDatabase`への`Update:*`を許可する内容にする。
+
 ### ネストしたスタック vs クロススタック参照
 
 | 項目 | ネストしたスタック（`AWS::CloudFormation::Stack`） | クロススタック参照 |
